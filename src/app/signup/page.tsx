@@ -14,7 +14,7 @@ export default function SignUp() {
     
     const router = useRouter()
 
-    const handleForm = async (event) => {
+    const handleForm = async (event: { preventDefault: () => void; }) => {
         event.preventDefault()
 
         const { result, error } = await signUp(email, password);
