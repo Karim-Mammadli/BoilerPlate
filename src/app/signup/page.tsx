@@ -167,10 +167,10 @@ export default function SignUp() {
 
               <div>
                 <label
-                  htmlFor="weight"
+                  htmlFor="gender"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >
-                  Weight
+                  gender
                 </label>
                 <select
                   value={gender}
