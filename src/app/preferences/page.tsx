@@ -27,7 +27,7 @@ export default function Home() {
     }
 
   return (
-    <div className="w-[40%] mx-auto">
+    <div className="w-[90%] mx-auto">
       <p className="text-2xl hover:text-base">Tell us more about yourself</p>
       <div>
         <p>Allergens</p>
