@@ -2,6 +2,7 @@
 import React from "react";
 import signUp from "../../../firebase/auth/signup";
 import { useRouter } from "next/navigation";
+import addData from "../../../firebase/addData";
 
 export default function SignUp() {
   const [email, setEmail] = React.useState("");
@@ -21,6 +22,21 @@ export default function SignUp() {
 
     if (error) {
       return console.log(error);
+    }
+
+    const data = {
+      email: email,
+      name: name,
+      weight: weight,
+      height: height,
+      age: age,
+      gender: gender
+    }
+
+    const { resultInsert, errorInsert } = await addData('users', result?.user.uid, data)
+
+    if (errorInsert) {
+      return console.log(errorInsert);
     }
 
     // else successful
