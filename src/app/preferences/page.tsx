@@ -17,35 +17,16 @@ const ALL_ALLERGENS = [
   "Coconut",
   "ShellFish",
 ];
-const ALL_ALLERGENS = [
-  "Eggs",
-  "Peanuts",
-  "Gluten",
-  "Milk",
-  "Sesame",
-  "Fish",
-  "Tree Nuts",
-  "Wheat",
-  "Coconut",
-  "ShellFish",
-];
 
 export default function Home() {
   const [allergens, setAllergens] = useState<string[]>([]);
-  const [allergens, setAllergens] = useState<string[]>([]);
 
-  const toggleAllergen = (allergen: string) => {
-    if (allergenToggled(allergen)) {
-      setAllergens((prev) => prev.filter((a) => a !== allergen));
-    } else {
-      setAllergens((prev) => [...prev, allergen]);
   const toggleAllergen = (allergen: string) => {
     if (allergenToggled(allergen)) {
       setAllergens((prev) => prev.filter((a) => a !== allergen));
     } else {
       setAllergens((prev) => [...prev, allergen]);
     }
-  };
   };
 
   // This checks if the allergen is already selected
