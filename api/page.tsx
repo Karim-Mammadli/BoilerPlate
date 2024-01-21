@@ -1,4 +1,5 @@
 import axios from "axios";
+import queryData from "../src/app/generate-answer";
 
 export default async function getFoodOptions(
   date,
@@ -7,7 +8,8 @@ export default async function getFoodOptions(
   allergensList
 ) {
   try {
-    const url = `http://api.hfs.purdue.edu/menus/v2/locations/${location}/${date}`;
+    const url = `
+    https://damp-caverns-90178-896e73de335a.herokuapp.com/http://api.hfs.purdue.edu/menus/v2/locations/${location}/${date}`;
     const response = await axios.get(url);
     const meals = response.data.Meals;
 
@@ -24,7 +26,7 @@ export default async function getFoodOptions(
       .map((item) => item.ID);
 
     //console.log(itemIds);
-    await getFoodNutritionFacts(itemIds);
+    getFoodNutritionFacts(itemIds);
   } catch (error) {
     console.error("Error fetching food options:", error);
   }
@@ -43,7 +45,7 @@ async function getFoodNutritionFacts(itemIds) {
         return response.data;
       })
     );
-    itemList.push(nutritionData);
+    await itemList.push(nutritionData);
   } catch (error) {
     console.error("Error fetching nutrition facts:", error);
   }
@@ -57,5 +59,7 @@ async function getFoodNutritionFacts(itemIds) {
     };
     totalNutritionsList.push(temp);
   });
-  //console.log(totalNutritionsList);
+  //console.log(totalNutritionsList)
+  return totalNutritionsList;
+  //return totalNutritionsList
 }

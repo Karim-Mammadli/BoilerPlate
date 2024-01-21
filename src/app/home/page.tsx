@@ -1,9 +1,89 @@
 // pages/index.tsx or pages/page.tsx depending on your routing setup
 'use client'
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useRouter } from "next/router";
-import Image from "next/image";
+import queryData from "../generate-answer";
+
 // import settingsIcon from "path-to-your-settings-icon.svg"; // Make sure to import your settings icon correctly
+export async function getFoodOptions(
+  date,
+  time,
+  location,
+  allergensList
+) {
+  try {
+    const url = `
+    https://damp-caverns-90178-896e73de335a.herokuapp.com/http://api.hfs.purdue.edu/menus/v2/locations/${location}/${date}`;
+    const response = await axios.get(url);
+    const meals = response.data.Meals;
+
+    const itemIds = meals
+      .filter((meal) => meal.Type === time)
+      .flatMap((meal) => meal.Stations)
+      .flatMap((station) => station.Items)
+      .filter((item) => {
+        const allergens = item.Allergens || [];
+        return allergens.every((allergen) =>
+          allergensList.includes(allergen.Name) ? !allergen.Value : true
+        );
+      })
+      .map((item) => item.ID);
+
+    //console.log(itemIds);
+    getFoodNutritionFacts(itemIds);
+  } catch (error) {
+    console.error("Error fetching food options:", error);
+  }
+}
+
+async function getFoodNutritionFacts(itemIds) {
+  const nutrients = ["Total Carbohydrate", "Total fat", "Calories", "Protein"];
+  const itemList: any[] = [];
+  const totalNutritionsList: any[] = [];
+  try {
+    const nutritionData = await Promise.all(
+      itemIds.map(async (id) => {
+        const url = `https://api.hfs.purdue.edu/menus/v2/items/${id}`;
+        const response = await axios.get(url);
+
+        return response.data;
+      })
+    );
+    await itemList.push(nutritionData);
+  } catch (error) {
+    console.error("Error fetching nutrition facts:", error);
+  }
+  //console.log(itemList);
+  itemList[0].map((item) => {
+    const temp = {
+      Name: item.Name,
+      ID: item.ID,
+      Nutritions: item.Nutrition,
+      Ingredients: item.Ingredients,
+    };
+    totalNutritionsList.push(temp);
+  });
+  console.log(totalNutritionsList)
+
+  const query = queryData(`Height: 5 ft 1 in
+  Gender: Male
+  Weight: 120 lbs
+  Age: 20
+  Number of times of exercise per week: 3
+  
+  Given the list of items offered at a dining court above and my body description, 
+  generate a meal that would be healthy based on the ingredients and nutrition facts 
+  on given data for each item to fulfill protein, carbohydrates, and fat - ${JSON.stringify(totalNutritionsList)}. 
+  Return the list of items in the form of JSON matching the format of the data I provided.`)
+  console.log((await query).choices[0].message.content)
+  //return temp
+  //return totalNutritionsList
+}
+
+const allergens =  ["Milk"]
+const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
+//console.log(temp)
 
 const HomePage = () => {
   const [date, setDate] = useState("");
@@ -11,13 +91,13 @@ const HomePage = () => {
   const [activeDiningCourt, setActiveDiningCourt] = useState("");
 
   const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
+  const allergens = ["Milk"];
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Greetings, Name!</h1>
         <button>
-          {/* <Image src={settingsIcon} alt="Settings" width={24} height={24} /> */}
         </button>
       </div>
 

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import React from "react";
 import { useRouter } from 'next/navigation'
+import getFoodOptions from "../../api/page";
 
 export default function Home() {
 
