@@ -6,11 +6,11 @@ import { useRouter } from "next/router";
 import queryData from "../generate-answer";
 
 // import settingsIcon from "path-to-your-settings-icon.svg"; // Make sure to import your settings icon correctly
-export async function getFoodOptions(
-  date,
-  time,
-  location,
-  allergensList
+async function getFoodOptions(
+  date: string,
+  time: string,
+  location: string,
+  allergensList: string[]
 ) {
   try {
     const url = `
@@ -19,31 +19,29 @@ export async function getFoodOptions(
     const meals = response.data.Meals;
 
     const itemIds = meals
-      .filter((meal) => meal.Type === time)
-      .flatMap((meal) => meal.Stations)
-      .flatMap((station) => station.Items)
-      .filter((item) => {
+      .filter((meal: any) => meal.Type === time)
+      .flatMap((meal: any) => meal.Stations)
+      .flatMap((station: any) => station.Items)
+      .filter((item: any) => {
         const allergens = item.Allergens || [];
-        return allergens.every((allergen) =>
+        return allergens.every((allergen: any) =>
           allergensList.includes(allergen.Name) ? !allergen.Value : true
         );
       })
-      .map((item) => item.ID);
+      .map((item: any) => item.ID);
 
-    //console.log(itemIds);
     getFoodNutritionFacts(itemIds);
   } catch (error) {
     console.error("Error fetching food options:", error);
   }
 }
 
-async function getFoodNutritionFacts(itemIds) {
-  const nutrients = ["Total Carbohydrate", "Total fat", "Calories", "Protein"];
+async function getFoodNutritionFacts(itemIds: any) {
   const itemList: any[] = [];
   const totalNutritionsList: any[] = [];
   try {
     const nutritionData = await Promise.all(
-      itemIds.map(async (id) => {
+      itemIds.map(async (id: any) => {
         const url = `https://api.hfs.purdue.edu/menus/v2/items/${id}`;
         const response = await axios.get(url);
 
@@ -54,8 +52,7 @@ async function getFoodNutritionFacts(itemIds) {
   } catch (error) {
     console.error("Error fetching nutrition facts:", error);
   }
-  //console.log(itemList);
-  itemList[0].map((item) => {
+  itemList[0].map((item: any) => {
     const temp = {
       Name: item.Name,
       ID: item.ID,
