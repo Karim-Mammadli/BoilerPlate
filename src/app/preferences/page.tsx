@@ -4,6 +4,8 @@ import updateData from "../../../firebase/updateData";
 import addData from "../../../firebase/addData";
 import firebase from "../../../node_modules/firebase/app";
 import { getAuth } from "firebase/auth";
+import { useRouter } from "next/navigation";
+
 
 const ALL_ALLERGENS = [
   "Eggs",
@@ -23,6 +25,8 @@ const VEGETERIAN = ["Yes", "No"];
 export default function Home() {
   const [allergens, setAllergens] = useState<string[]>([]);
   const [vegeterian, setVegeterian] = useState("");
+
+  const router = useRouter(); 
 
   const toggleAllergen = (allergen: string) => {
     if (allergenToggled(allergen)) {
@@ -66,8 +70,10 @@ export default function Home() {
       if (errorUpdate) {
         addData("userCollection", user.uid, userData);
         console.log("User Collection Created.");
+        // router.push("/home");
       } else {
         console.log("Data updated successfully: ", resultUpdate);
+        // router.push("/home");
       }
     } else {
       console.error("No user is signed in.");

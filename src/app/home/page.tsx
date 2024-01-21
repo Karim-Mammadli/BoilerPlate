@@ -2,7 +2,7 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import queryData from "../generate-answer";
 import getDocument from "../../../firebase/getData";
 import updateData from "../../../firebase/updateData";
@@ -85,8 +85,9 @@ async function getFoodNutritionFacts(itemIds: any) {
   //return totalNutritionsList
 }
 
-const allergens =  ["Milk"]
+const allergens = 
 const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
+// const temp2 = getFoodOptions()
 //console.log(temp)
 
 
@@ -96,12 +97,20 @@ const HomePage = () => {
   const [time, setTime] = useState("");
   const [activeDiningCourt, setActiveDiningCourt] = useState("");
 
+  const router = useRouter();
+
+  const user = getAuth().currentUser;
+
+  if(!user) {
+    console.log("user is null");
+    return router.push("/")
+  }
 
   const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
-  const allergens = ["Milk"];
+  const { result, error } = await getDocument("users", user.uid);
+  const allergens = 
 
 
-  const router = useRouter();
 
   useEffect(() => {
     const auth = getAuth();
@@ -131,15 +140,32 @@ const HomePage = () => {
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, [router]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!date || !time || !activeDiningCourt) {
+      console.log("Please fill in all fields.");
+      return;
+    }
+
+    // Call getFoodOptions with the state variables
+    console.log("sol is ", date, time, activeDiningCourt, allergens);
+    // await getFoodOptions(date, time, activeDiningCourt, allergens);
+  };
   
   
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Greetings, Name!</h1>
+    <div className="container mx-auto p-4 bg-gray-800 min-h-screen">
+      <div className="flex justify-between items-center pb-3">
+        <h1 className="text-2xl font-bold dark:text-white">Greetings!</h1>
         <button>
+          {/* <Image src={settingsIcon} alt="Settings" width={24} height={24} /> */}
         </button>
       </div>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg>
+
 
       <div className="flex space-x-2 overflow-x-auto py-4">
         {diningCourts.map((court) => (
@@ -156,19 +182,69 @@ const HomePage = () => {
           </button>
         ))}
       </div>
-      
-      {/* Drop down for date of foods */}
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          type="text"
-          placeholder="mm-dd-yyyy"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="input input-bordered w-full max-w-xs"
-        />
 
-        <select
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit}>
+        <div className="max-w-fit">
+          <label
+            htmlFor="date"
+            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Date
+          </label>
+          <input
+            onChange={(e) => {
+              // Allow only digits and automatically add dashes
+              const value = e.target.value.replace(
+                // Regex to allow digits and specific format
+                /^(\d{0,2})-?(\d{0,2})-?(\d{0,4}).*/,
+                (match, p1, p2, p3) => {
+                  // Construct the date string using groups captured by the regex
+                  return `${p1}${p2 ? "-" + p2 : ""}${p3 ? "-" + p3 : ""}`;
+                }
+              );
+              // Update state only if the change matches the desired pattern
+              if (/^\d{0,2}-?\d{0,2}-?\d{0,4}$/.test(value)) {
+                setDate(value);
+              }
+            }}
+            value={date}
+            required
+            type="text"
+            name="date"
+            id="date"
+            placeholder="mm-dd-yyyy"
+            maxLength={10} // Limit the length to match the format mm-dd-yyyy
+            className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+
+          <select
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className="bg-gray-50 mt-5 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-auto max-w-fit p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            <option value="" disabled selected>
+              Choose a time
+            </option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Late Lunch">Late Lunch</option>
+            <option value="Dinner">Dinner</option>
+          </select>
+          
+        </div>
+
+        <div className="flex justify-center pt-4">
+          <button type="submit" className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+            Get Food Options
+          </button>
+        </div>
+      </form>
+
+
+        {/* Drop down for date of foods */}
+
+        {/* <select
           value={time}
           onChange={(e) => setTime(e.target.value)}
           className="select select-bordered w-full max-w-xs"
@@ -180,7 +256,7 @@ const HomePage = () => {
           <option value="Lunch">Lunch</option>
           <option value="Dinner">Dinner</option>
           <option value="Late Lunch">Late Lunch</option>
-        </select>
+        </select> */}
       </div>
 
       <div className="output-field my-4 p-4 border border-gray-300 rounded">
@@ -193,8 +269,7 @@ const HomePage = () => {
         <div className="p-4 border border-gray-300 rounded">Output 2</div>
         <div className="p-4 border border-gray-300 rounded">Output 3</div>
       </div>
-    </div>
-  );
+    </div>  );
 };
 
 export default HomePage;
