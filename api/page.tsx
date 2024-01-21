@@ -23,7 +23,7 @@ export default async function getFoodOptions(
       })
       .map((item) => item.ID);
 
-    console.log(itemIds);
+    //console.log(itemIds);
     await getFoodNutritionFacts(itemIds);
   } catch (error) {
     console.error("Error fetching food options:", error);
@@ -47,7 +47,7 @@ async function getFoodNutritionFacts(itemIds) {
   } catch (error) {
     console.error("Error fetching nutrition facts:", error);
   }
-  console.log(itemList);
+  //console.log(itemList);
   itemList[0].map((item) => {
     const temp = {
       Name: item.Name,
@@ -57,5 +57,5 @@ async function getFoodNutritionFacts(itemIds) {
     };
     totalNutritionsList.push(temp);
   });
-  console.log(totalNutritionsList);
+  //console.log(totalNutritionsList);
 }
