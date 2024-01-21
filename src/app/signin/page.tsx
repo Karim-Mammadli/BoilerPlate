@@ -19,7 +19,7 @@ export default function SignIn() {
 
         // else successful
         console.log(result)
-        return router.push("/")
+        return router.push("/preferences")
     }
 
 //     <section className="bg-gray-50 dark:bg-gray-900">
