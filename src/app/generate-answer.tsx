@@ -9,8 +9,7 @@ const configuration = new OpenAI({
 export default async function queryData(info: any) {
     const completion = await configuration.chat.completions.create({
         messages: [{ role: "system", content: info }],
-        model: "gpt-4-1106-preview",
-        response_format: {"type": "json_object"}
+        model: "gpt-4-1106-preview"
     });
     
     return completion

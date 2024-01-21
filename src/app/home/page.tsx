@@ -10,83 +10,9 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 
 // import settingsIcon from "path-to-your-settings-icon.svg"; // Make sure to import your settings icon correctly
-async function getFoodOptions(
-  date: string,
-  time: string,
-  location: string,
-  allergensList: string[]
-) {
-  try {
-    const url = `
-    https://damp-caverns-90178-896e73de335a.herokuapp.com/http://api.hfs.purdue.edu/menus/v2/locations/${location}/${date}`;
-    const response = await axios.get(url);
-    const meals = response.data.Meals;
 
-    const itemIds = meals
-      .filter((meal: any) => meal.Type === time)
-      .flatMap((meal: any) => meal.Stations)
-      .flatMap((station: any) => station.Items)
-      .filter((item: any) => {
-        const allergens = item.Allergens || [];
-        return allergens.every((allergen: any) =>
-          allergensList.includes(allergen.Name) ? !allergen.Value : true
-        );
-      })
-      .map((item: any) => item.ID);
-
-    getFoodNutritionFacts(itemIds);
-  } catch (error) {
-    console.error("Error fetching food options:", error);
-  }
-}
-
-
-
-async function getFoodNutritionFacts(itemIds: any) {
-  const itemList: any[] = [];
-  const totalNutritionsList: any[] = [];
-  try {
-    const nutritionData = await Promise.all(
-      itemIds.map(async (id: any) => {
-        const url = `https://api.hfs.purdue.edu/menus/v2/items/${id}`;
-        const response = await axios.get(url);
-
-        return response.data;
-      })
-    );
-    await itemList.push(nutritionData);
-  } catch (error) {
-    console.error("Error fetching nutrition facts:", error);
-  }
-  itemList[0].map((item: any) => {
-    const temp = {
-      Name: item.Name,
-      ID: item.ID,
-      Nutritions: item.Nutrition,
-      Ingredients: item.Ingredients,
-    };
-    totalNutritionsList.push(temp);
-  });
-  console.log(totalNutritionsList)
-
-  const query = queryData(`Height: 5 ft 1 in
-  Gender: Male
-  Weight: 120 lbs
-  Age: 20
-  Number of times of exercise per week: 3
-  
-  Given the list of items offered at a dining court above and my body description, 
-  generate a meal that would be healthy based on the ingredients and nutrition facts 
-  on given data for each item to fulfill protein, carbohydrates, and fat - ${JSON.stringify(totalNutritionsList)}. 
-  Return the list of items in the form of JSON matching the format of the data I provided.`)
-  console.log((await query).choices[0].message.content)
-
-  //return temp
-  //return totalNutritionsList
-}
-
-const allergens = 
-const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
+const allergens =  ["Milk"]
+// const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
 // const temp2 = getFoodOptions()
 //console.log(temp)
 
@@ -96,21 +22,45 @@ const HomePage = () => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [activeDiningCourt, setActiveDiningCourt] = useState("");
+  const [output, setOutput] = useState("");
+  const [outputContent, setOutputContent] = useState("");
+
+
+  const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
+  const allergens = ["Milk"];
+
 
   const router = useRouter();
 
-  const user = getAuth().currentUser;
-
-  if(!user) {
-    console.log("user is null");
-    return router.push("/")
+  async function getFoodOptions(
+    date: string,
+    time: string,
+    location: string,
+    allergensList: string[]
+  ) {
+    try {
+      const url = `
+      https://damp-caverns-90178-896e73de335a.herokuapp.com/http://api.hfs.purdue.edu/menus/v2/locations/${location}/${date}`;
+      const response = await axios.get(url);
+      const meals = response.data.Meals;
+  
+      const itemIds = meals
+        .filter((meal: any) => meal.Type === time)
+        .flatMap((meal: any) => meal.Stations)
+        .flatMap((station: any) => station.Items)
+        .filter((item: any) => {
+          const allergens = item.Allergens || [];
+          return allergens.every((allergen: any) =>
+            allergensList.includes(allergen.Name) ? !allergen.Value : true
+          );
+        })
+        .map((item: any) => item.ID);
+  
+      getFoodNutritionFacts(itemIds, date, time, location, allergensList);
+    } catch (error) {
+      console.error("Error fetching food options:", error);
+    }
   }
-
-  const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
-  const { result, error } = await getDocument("users", user.uid);
-  const allergens = 
-
-
 
   useEffect(() => {
     const auth = getAuth();
@@ -150,8 +100,61 @@ const HomePage = () => {
 
     // Call getFoodOptions with the state variables
     console.log("sol is ", date, time, activeDiningCourt, allergens);
-    // await getFoodOptions(date, time, activeDiningCourt, allergens);
+    await getFoodOptions(date, time, activeDiningCourt, allergens);
   };
+
+
+  const getFoodNutritionFacts = async (itemIds: any, date: string, time: string, location: string, allergensList: string[]) => {
+  const itemList: any[] = [];
+  const totalNutritionsList: any[] = [];
+  try {
+    const nutritionData = await Promise.all(
+      itemIds.map(async (id: any) => {
+        const url = `https://api.hfs.purdue.edu/menus/v2/items/${id}`;
+        const response = await axios.get(url);
+
+        return response.data;
+      })
+    );
+    await itemList.push(nutritionData);
+  } catch (error) {
+    console.error("Error fetching nutrition facts:", error);
+  }
+  itemList[0].map((item: any) => {
+    const temp = {
+      Name: item.Name,
+      ID: item.ID,
+      Nutritions: item.Nutrition,
+      Ingredients: item.Ingredients,
+    };
+    totalNutritionsList.push(temp);
+  });
+  console.log(totalNutritionsList)
+
+  const query = queryData(`Height: 5 ft 1 in
+    Gender: Male
+    Weight: 120 lbs
+    Age: 20
+    Number of times of exercise per week: 3
+  
+    Given the list of items offered at a dining court above and my body description, 
+    generate a meal that would be healthy based on the ingredients and nutrition facts 
+    on given data for each item to fulfill protein, carbohydrates, and fat - ${JSON.stringify(totalNutritionsList)}. 
+    Return the list of items in the form of a numbered list format: X. Item Name - X Total Calories, X Protein, X Total Fat, X Total Carbohydrates`)
+  console.log((await query).choices[0].message.content)
+  // document.getElementById("output1")?.setContent((await query).choices[0].message.content);
+  const response = await query; // Await the query response
+  if(!response.choices[0].message.content) {
+    return
+  }
+  setOutputContent(response.choices[0].message.content);
+  if(document.getElementById == null) {
+    return;
+  }
+    document.getElementById("output1")?.textContent(response.choices[0].message.content);
+  //return temp
+  //return totalNutritionsList
+}
   
   
   return (
@@ -240,23 +243,6 @@ const HomePage = () => {
           </button>
         </div>
       </form>
-
-
-        {/* Drop down for date of foods */}
-
-        {/* <select
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className="select select-bordered w-full max-w-xs"
-        >
-          <option value="" disabled selected>
-            Choose a time
-          </option>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Lunch">Lunch</option>
-          <option value="Dinner">Dinner</option>
-          <option value="Late Lunch">Late Lunch</option>
-        </select> */}
       </div>
 
       <div className="output-field my-4 p-4 border border-gray-300 rounded">
@@ -265,9 +251,7 @@ const HomePage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Dummy output fields */}
-        <div className="p-4 border border-gray-300 rounded">Output 1</div>
-        <div className="p-4 border border-gray-300 rounded">Output 2</div>
-        <div className="p-4 border border-gray-300 rounded">Output 3</div>
+        <div id="output1" className="p-4 border border-gray-300 rounded">Output 1</div>
       </div>
     </div>  );
 };
