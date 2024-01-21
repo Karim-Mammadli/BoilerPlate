@@ -1,30 +1,33 @@
 "use client";
-import Image from "next/image";
 import React, { useState } from "react";
 
-const ALL_ALLERGENS = ["Eggs", "Peanuts", "Gluten", "Milk", "Sesame",
-"Fish",
-"Tree Nuts",
-"Wheat",
-"Coconut",
-"ShellFish",
-]
-
+const ALL_ALLERGENS = [
+  "Eggs",
+  "Peanuts",
+  "Gluten",
+  "Milk",
+  "Sesame",
+  "Fish",
+  "Tree Nuts",
+  "Wheat",
+  "Coconut",
+  "ShellFish",
+];
 
 export default function Home() {
-    const [allergens, setAllergens] = useState<string[]>([])
+  const [allergens, setAllergens] = useState<string[]>([]);
 
-    const toggleAllergen = (allergen: string) => {
-        if (allergenToggled(allergen)) {
-            setAllergens(prev => prev.filter((a) => a !== allergen))
-        } else {
-            setAllergens(prev => [...prev, allergen])
-        }
+  const toggleAllergen = (allergen: string) => {
+    if (allergenToggled(allergen)) {
+      setAllergens((prev) => prev.filter((a) => a !== allergen));
+    } else {
+      setAllergens((prev) => [...prev, allergen]);
     }
+  };
 
-    const allergenToggled = (allergen: string) => {
-        return allergens.includes(allergen)
-    }
+  const allergenToggled = (allergen: string) => {
+    return allergens.includes(allergen);
+  };
 
   return (
     <div className="w-[90%] mx-auto">
@@ -32,13 +35,26 @@ export default function Home() {
       <div>
         <p>Allergens</p>
         <div className="grid grid-cols-3 gap-x-2 gap-y-3">
-            {ALL_ALLERGENS.map((allergen) => (
-          <button key={allergen} className=" border-solid border-2 border-indigo-200 rounded-lg has-[:checked]:bg-indigo-400 has-[:checked]:border-indigo-400 hover:bg-indigo-200 transition duration-200">
-            <label htmlFor={allergen} className="w-full h-full inline-block cursor-pointer px-5 py-2.5">{allergen}</label>
-            <input type="checkbox" id={allergen} className="hidden" checked={allergenToggled(allergen)} onChange={() => toggleAllergen(allergen)} />
-          </button>
-
-            ))}
+          {ALL_ALLERGENS.map((allergen) => (
+            <button
+              key={allergen}
+              className=" border-solid border-2 border-indigo-200 rounded-lg has-[:checked]:bg-indigo-400 has-[:checked]:border-indigo-400 hover:bg-indigo-200 transition duration-200"
+            >
+              <label
+                htmlFor={allergen}
+                className="w-full h-full inline-block cursor-pointer px-5 py-2.5"
+              >
+                {allergen}
+              </label>
+              <input
+                type="checkbox"
+                id={allergen}
+                className="hidden"
+                checked={allergenToggled(allergen)}
+                onChange={() => toggleAllergen(allergen)}
+              />
+            </button>
+          ))}
         </div>
       </div>
 
