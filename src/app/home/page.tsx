@@ -11,8 +11,29 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 // import settingsIcon from "path-to-your-settings-icon.svg"; // Make sure to import your settings icon correctly
 
+<<<<<<< HEAD
 const allergens =  ["Milk"]
 // const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
+=======
+  const query = queryData(`Height: 4 ft 8 in
+    Gender: Female
+    Weight: 96 lbs
+    Age: 18
+    Number of times of exercise per week: 2
+    
+    Given the list of items offered at a dining court and my body description, 
+    generate a meal that would be healthy based on the ingredients and nutrition facts 
+    on given data for each item to fulfill protein, carbohydrates, and fat - ${JSON.stringify(totalNutritionsList)}. 
+    Return the list of items in the form of a numbered list formatted as: X. Item Name - X Total Calories, X Protein, X Total Fat, X Total Carbohydrates`)
+  console.log((await query).choices[0].message.content)
+
+  //return temp
+  //return totalNutritionsList
+}
+
+const allergens = ["Milk"]
+const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
+>>>>>>> 39adaa01b149b3da3eb97e3aa909fef21516409b
 // const temp2 = getFoodOptions()
 //console.log(temp)
 
@@ -25,6 +46,7 @@ const HomePage = () => {
   const [output, setOutput] = useState("");
   const [outputContent, setOutputContent] = useState("");
 
+<<<<<<< HEAD
 
   const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
   const allergens = ["Milk"];
@@ -90,6 +112,11 @@ const HomePage = () => {
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, [router]);
+=======
+  const router = useRouter();
+
+  const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
+>>>>>>> 39adaa01b149b3da3eb97e3aa909fef21516409b
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
