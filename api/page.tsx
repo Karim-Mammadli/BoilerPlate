@@ -1,34 +1,61 @@
-import axios from 'axios';
+import axios from "axios";
 
-export default async function getFoodOptions(date: string, time: string, location: string) {
+export default async function getFoodOptions(
+  date,
+  time,
+  location,
+  allergensList
+) {
+  try {
     const url = `http://api.hfs.purdue.edu/menus/v2/locations/${location}/${date}`;
-    // https://api.hfs.purdue.edu/menus/v2/items/<INSERT_ITEM HERE>
-    axios.get(url)
-      .then(
-        res => {
-            const menus = res.data.Meals
-            //menus.map((menu: any) => console.log(menu))
+    const response = await axios.get(url);
+    const meals = response.data.Meals;
 
-            if (res.data.Meals.Type == time) {
-              
-            }
+    const itemIds = meals
+      .filter((meal) => meal.Type === time)
+      .flatMap((meal) => meal.Stations)
+      .flatMap((station) => station.Items)
+      .filter((item) => {
+        const allergens = item.Allergens || [];
+        return allergens.every((allergen) =>
+          allergensList.includes(allergen.Name) ? !allergen.Value : true
+        );
+      })
+      .map((item) => item.ID);
 
-            console.log(res.data.Meals[0].Stations[0].Items[0])
-            return res.data.Meals
-        }
-      )
+    console.log(itemIds);
+    await getFoodNutritionFacts(itemIds);
+  } catch (error) {
+    console.error("Error fetching food options:", error);
+  }
 }
 
-export async function getFoodNutritionFacts(itemId: string) {
-  const url = `https://api.hfs.purdue.edu/menus/v2/items/${itemId}`
+async function getFoodNutritionFacts(itemIds) {
+  const nutrients = ["Total Carbohydrate", "Total fat", "Calories", "Protein"];
+  const itemList: any[] = [];
+  const totalNutritionsList: any[] = [];
+  try {
+    const nutritionData = await Promise.all(
+      itemIds.map(async (id) => {
+        const url = `https://api.hfs.purdue.edu/menus/v2/items/${id}`;
+        const response = await axios.get(url);
 
-  axios.get(url)
-    .then(
-      res => {
-        const allergens = res.data.Allergens
-        const Nutrition = res.data.Nutrition
-          console.log(res.data.Nutrition)
-          return res.data
-      }
-    )
+        return response.data;
+      })
+    );
+    itemList.push(nutritionData);
+  } catch (error) {
+    console.error("Error fetching nutrition facts:", error);
+  }
+  console.log(itemList);
+  itemList[0].map((item) => {
+    const temp = {
+      Name: item.Name,
+      ID: item.ID,
+      Nutritions: item.Nutrition,
+      Ingredients: item.Ingredients,
+    };
+    totalNutritionsList.push(temp);
+  });
+  console.log(totalNutritionsList);
 }
