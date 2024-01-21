@@ -8,6 +8,11 @@ import "flowbite";
 export default function SignUp() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+
+  const [passwordError, setPasswordError] = React.useState("");
+  const [emailInUseError, setEmailInUseError] = React.useState("");
+  const [genderError, setGenderError] = React.useState("");
+
   const [name, setName] = React.useState("");
   const [weight, setWeight] = React.useState("");
   const [height, setHeight] = React.useState("");
@@ -19,35 +24,56 @@ export default function SignUp() {
   const handleForm = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
-    const { result, error } = await signUp(email, password);
+    setGenderError("");
 
-    if (error) {
-      return console.log(error);
+    try {
+      const { result, error } = await signUp(email, password);
+
+      // If there's an error, throw it to the catch block
+      if (error) {
+        throw error;
+      }
+
+      if (gender === "Null") {
+        setGenderError("Please choose your gender.");
+        return; // Prevent form submission if there's a gender error
+      }
+
+      const data = {
+        email: email,
+        name: name,
+        weight: weight,
+        height: height,
+        age: age,
+        gender: gender,
+      };
+
+      const { resultInsert, errorInsert } = await addData(
+        "users",
+        result?.user.uid,
+        data
+      );
+
+      // If there's an error inserting data, throw it to the catch block
+      if (errorInsert) {
+        throw errorInsert;
+      }
+
+      // else successful
+      console.log("User successfully added.");
+      console.log(result);
+      return router.push("/preferences");
+    } catch (error: any) {
+      if (error.code === "auth/email-already-in-use") {
+        setEmailInUseError("Email already in use."); // Set email error state
+      } else if (error.code === "auth/weak-password") {
+        setPasswordError("Password too weak."); // Set password error state
+      } else {
+        console.log(error); // Log unknown errors
+      }
     }
-
-    const data = {
-      email: email,
-      name: name,
-      weight: weight,
-      height: height,
-      age: age,
-      gender: gender,
-    };
-
-    const { resultInsert, errorInsert } = await addData(
-      "users",
-      result?.user.uid,
-      data
-    );
-
-    if (errorInsert) {
-      return console.log(errorInsert);
-    }
-
-    // else successful
-    console.log(result);
-    return router.push("/");
   };
+
   return (
     <section className="dark:bg-gray-900 min-h-screen">
       <div className="flex flex-col items-center justify-center px-6 py-8 min-h-screen">
@@ -85,7 +111,12 @@ export default function SignUp() {
                   Your email
                 </label>
                 <input
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailInUseError) {
+                      setEmailInUseError("");
+                    }
+                  }}
                   required
                   type="email"
                   name="email"
@@ -95,6 +126,28 @@ export default function SignUp() {
                 />
               </div>
 
+              {emailInUseError && (
+                <div
+                  className="flex items-center p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300"
+                  role="alert"
+                >
+                  <svg
+                    className="flex-shrink-0 inline w-4 h-4 me-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                  </svg>
+                  <span className="sr-only">Info</span>
+                  <div>
+                    <span className="font-medium">Warning!</span>{" "}
+                    {emailInUseError} {"Try another email."}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label
                   htmlFor="password"
@@ -103,7 +156,12 @@ export default function SignUp() {
                   Password
                 </label>
                 <input
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (passwordError) {
+                      setPasswordError("");
+                    }
+                  }}
                   required
                   type="password"
                   name="password"
@@ -112,6 +170,29 @@ export default function SignUp() {
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 />
               </div>
+
+              {/* if there is error in password setpassword */}
+              {passwordError && (
+                <div
+                  className="flex items-center p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300"
+                  role="alert"
+                >
+                  <svg
+                    className="flex-shrink-0 inline w-4 h-4 me-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                  </svg>
+                  <span className="sr-only">Info</span>
+                  <div>
+                    <span className="font-medium">Warning!</span>{" "}
+                    {passwordError} {"Make it >= 6 characters."}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label
@@ -172,7 +253,7 @@ export default function SignUp() {
                     placeholder="Height"
                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-auto p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   />
-                  <span className="ps-2 text-xs text-gray-400">ft</span>
+                  <span className="ps-2 text-xs text-gray-400">ft, in</span>
                 </div>
               </div>
 
@@ -186,7 +267,12 @@ export default function SignUp() {
                 <select
                   id="gender"
                   value={gender}
-                  onChange={(e) => setGender(e.target.value)}
+                  onChange={(e) => {
+                    setGender(e.target.value);
+                    if (genderError) {
+                      setGenderError("");
+                    }
+                  }}
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-auto p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 >
                   <option defaultValue="Null">Choose your gender</option>
@@ -212,9 +298,9 @@ export default function SignUp() {
                         // xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
                           d="M14 5l7 7m0 0l-7 7m7-7H3"
                         ></path>
                       </svg>
@@ -228,9 +314,9 @@ export default function SignUp() {
                         // xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
                           d="M14 5l7 7m0 0l-7 7m7-7H3"
                         ></path>
                       </svg>
