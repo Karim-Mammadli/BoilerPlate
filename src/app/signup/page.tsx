@@ -17,6 +17,7 @@ export default function SignUp() {
   const [weight, setWeight] = React.useState("");
   const [height, setHeight] = React.useState("");
   const [age, setAge] = React.useState("");
+  const [exercise, setExercise] = React.useState("");
   const [gender, setGender] = React.useState("");
 
   const router = useRouter();
@@ -46,6 +47,7 @@ export default function SignUp() {
         height: height,
         age: age,
         gender: gender,
+        exercise: exercise
       };
 
       const { resultInsert, errorInsert } = await addData(
@@ -193,6 +195,24 @@ export default function SignUp() {
                   </div>
                 </div>
               )}
+
+              <div>
+                <label
+                  htmlFor="No. of time of exercises Per Week"
+                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  No. of times of Exercise Per Week
+                </label>
+                <input
+                  onChange={(e) => setExercise(e.target.value)}
+                  required
+                  type="exercise"
+                  name="exercise"
+                  id="exercise"
+                  placeholder="Exercise"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-auto p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                />
+              </div>
 
               <div>
                 <label

@@ -69,23 +69,23 @@ async function getFoodNutritionFacts(itemIds: any) {
   });
   console.log(totalNutritionsList)
 
-  const query = queryData(`Height: 5 ft 1 in
-  Gender: Male
-  Weight: 120 lbs
-  Age: 20
-  Number of times of exercise per week: 3
-  
-  Given the list of items offered at a dining court above and my body description, 
-  generate a meal that would be healthy based on the ingredients and nutrition facts 
-  on given data for each item to fulfill protein, carbohydrates, and fat - ${JSON.stringify(totalNutritionsList)}. 
-  Return the list of items in the form of JSON matching the format of the data I provided.`)
+  const query = queryData(`Height: 4 ft 8 in
+    Gender: Female
+    Weight: 96 lbs
+    Age: 18
+    Number of times of exercise per week: 2
+    
+    Given the list of items offered at a dining court and my body description, 
+    generate a meal that would be healthy based on the ingredients and nutrition facts 
+    on given data for each item to fulfill protein, carbohydrates, and fat - ${JSON.stringify(totalNutritionsList)}. 
+    Return the list of items in the form of a numbered list formatted as: X. Item Name - X Total Calories, X Protein, X Total Fat, X Total Carbohydrates`)
   console.log((await query).choices[0].message.content)
 
   //return temp
   //return totalNutritionsList
 }
 
-const allergens = 
+const allergens = ["Milk"]
 const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
 // const temp2 = getFoodOptions()
 //console.log(temp)
@@ -99,47 +99,7 @@ const HomePage = () => {
 
   const router = useRouter();
 
-  const user = getAuth().currentUser;
-
-  if(!user) {
-    console.log("user is null");
-    return router.push("/")
-  }
-
   const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
-  const { result, error } = await getDocument("users", user.uid);
-  const allergens = 
-
-
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const { result, error } = await getDocument("users", user.uid);
-          if (error) {
-            console.log("error retrieving user data:", error);
-            // Handle the error appropriately
-          } else if (result?.exists()) {
-            console.log("document values", result.data());
-            // Process the document data as needed
-          } else {
-            console.log("No such document!");
-            // Handle the case where the document does not exist
-          }
-        } catch (error) {
-          console.error("An error occurred while fetching user data:", error);
-        }
-      } else {
-        console.log("User is not signed in!");
-        router.push("/signin");
-      }
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [router]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
