@@ -1,10 +1,10 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import signUp from "../../../firebase/auth/signup";
 import { useRouter } from "next/navigation";
 import getDocument from "../../../firebase/getData";
 import updateData from "../../../firebase/updateData";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import "flowbite";
 
 export default function SignUp() {
@@ -23,26 +23,66 @@ export default function SignUp() {
 
   const router = useRouter(); 
 
-
-const handleForm1 = async (event: { preventDefault: () => void }) => {
+  const handleForm1 = async (ev?: { preventDefault: () => void }) => {
+    
+    ev?.preventDefault;
     const user = getAuth().currentUser;
-      if(!user) {
-        console.log("user is not signed in!")
-        return router.push("/signin");
-      }
-  const {result, error } = await getDocument(
-    "users",
-    user.uid,
-  );
-
-    if(error) {
-        console.log("error retrieving user data. User not signed in")
-        throw error;
+    console.log("user is", user);
+    if (!user) {
+      console.log("user is not signed in!");
+      return router.push("/signin");
     }
+    const { result, error } = await getDocument("users", user.uid);
+  
+    if (error) {
+      console.log("error retrieving user data:", error);
+      // Handle the error appropriately
+    } else if (result?.exists()) {
+      console.log("document values", result.data());
+      // Process the document data as needed
+    } else {
+      console.log("No such document!");
+      // Handle the case where the document does not exist
+    }
+  };
+  
+//   useEffect(() => {
+//     handleForm1();
+//     // You may need to disable the lint warning about missing dependencies
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//   }, []); // The empty dependency array [] means it will only run once after the initial render
 
-    console.log("document values", result?.data)
-}
+useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const { result, error } = await getDocument("users", user.uid);
+          if (error) {
+            console.log("error retrieving user data:", error);
+            // Handle the error appropriately
+          } else if (result?.exists()) {
+            console.log("document values", result.data());
+            // Process the document data as needed
+          } else {
+            console.log("No such document!");
+            // Handle the case where the document does not exist
+          }
+        } catch (error) {
+          console.error("An error occurred while fetching user data:", error);
+        }
+      } else {
+        console.log("User is not signed in!");
+        router.push("/signin");
+      }
+    });
 
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [router]);
+
+  // ... your JSX and other code
+  
   const handleForm = async (event: { preventDefault: () => void }) => {
     
     event.preventDefault();
@@ -56,6 +96,7 @@ const handleForm1 = async (event: { preventDefault: () => void }) => {
         console.log("user is not signed in!")
         return router.push("/signin");
       }
+        console.log("USER IS:" + user);
         const details:any = null;
 
     //   const { result, error } = await signUp(email, password);

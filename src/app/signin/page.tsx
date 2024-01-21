@@ -19,6 +19,7 @@ export default function SignIn() {
 
         // else successful
         console.log(result)
+        console.log("user email is", result?.user.email)
         return router.push("/preferences")
     }
 
