@@ -4,6 +4,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import queryData from "../generate-answer";
+import getDocument from "../../../firebase/getData";
+import updateData from "../../../firebase/updateData";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 
 // import settingsIcon from "path-to-your-settings-icon.svg"; // Make sure to import your settings icon correctly
 async function getFoodOptions(
@@ -35,6 +39,8 @@ async function getFoodOptions(
     console.error("Error fetching food options:", error);
   }
 }
+
+
 
 async function getFoodNutritionFacts(itemIds: any) {
   const itemList: any[] = [];
@@ -74,6 +80,7 @@ async function getFoodNutritionFacts(itemIds: any) {
   on given data for each item to fulfill protein, carbohydrates, and fat - ${JSON.stringify(totalNutritionsList)}. 
   Return the list of items in the form of JSON matching the format of the data I provided.`)
   console.log((await query).choices[0].message.content)
+
   //return temp
   //return totalNutritionsList
 }
@@ -82,14 +89,50 @@ const allergens =  ["Milk"]
 const temp = getFoodOptions("01-17-2024", "Lunch", "Earhart", allergens);
 //console.log(temp)
 
+
+
 const HomePage = () => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [activeDiningCourt, setActiveDiningCourt] = useState("");
 
+
   const diningCourts = ["Wiley", "Earhart", "Hillenbrand", "Cary", "Windsor"];
   const allergens = ["Milk"];
 
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const { result, error } = await getDocument("users", user.uid);
+          if (error) {
+            console.log("error retrieving user data:", error);
+            // Handle the error appropriately
+          } else if (result?.exists()) {
+            console.log("document values", result.data());
+            // Process the document data as needed
+          } else {
+            console.log("No such document!");
+            // Handle the case where the document does not exist
+          }
+        } catch (error) {
+          console.error("An error occurred while fetching user data:", error);
+        }
+      } else {
+        console.log("User is not signed in!");
+        router.push("/signin");
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [router]);
+  
+  
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center">
